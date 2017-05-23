@@ -107,9 +107,9 @@ sub redirect(Str $location) is export {
 
 sub baile($port = 3000) is export {
     my $psgi-app = app.get-psgi-app();
-    given HTTP::Easy::PSGI.new(:host<0.0.0.0>,:port($port)) {
+    given HTTP::Easy::PSGI.new(:port($port)) {
         .app($psgi-app);
-        say "Entering the development dance floor: http://0.0.0.0:$port";
+        say "Entering the development dance floor: http://$host:$port";
         .run;
     }
 }
