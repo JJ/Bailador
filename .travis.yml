@@ -7,7 +7,9 @@ perl6:
   - latest
 install:
   - rakudobrew build-zef
-  - zef --debug install .
-branches:
-  only:
-  - master
+  - zef --depsonly install .
+#branches:
+#  only:
+#  - master
+notifications:
+    slack: perl6-bailador:FuFG55nk94k5BSOeGMNO5nDh

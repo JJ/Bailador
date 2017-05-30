@@ -7,15 +7,16 @@ use Bailador::Sessions;
 use Bailador::Sessions::Config;
 use Bailador::Exceptions;
 use Bailador::ContentTypes;
+use Template::Mojo;
 
 class Bailador::App is Bailador::Route {
     has Str $.location is rw = '.';
+    has Bool $.debug is rw = False;
     has Bailador::ContentTypes $.content-types = Bailador::ContentTypes.new;
     has Bailador::Context  $.context  = Bailador::Context.new;
     has Bailador::Template $.renderer is rw = Bailador::Template::Mojo.new;
     has Bailador::Sessions::Config $.sessions-config = Bailador::Sessions::Config.new;
     has Bailador::Sessions $!sessions;
-
 
     method request  { $.context.request  }
     method response { $.context.response }
@@ -113,15 +114,19 @@ class Bailador::App is Bailador::Route {
                     self.render(status => 404, type => 'text/html, charset=utf-8', content => $err-page);
                 }
                 default {
-                    if ($env<p6sgi.errors>:exists) {
-                        my $err = $env<p6sgi.errors>;
+                    if ($env<p6w.errors>:exists) {
+                        my $err = $env<p6w.errors>;
                         $err.say(.gist);
                     }
                     else {
                         note .gist;
                     }
+
                     my $err-page;
-                    if $!location.defined {
+                    if $!debug {
+                        state $error-template = Template::Mojo.new(%?RESOURCES<error.template>.IO.slurp);
+                        $err-page = $error-template.render($_, self.request());
+                    } elsif $!location.defined {
                         $err-page = "$!location/views/500.xx".IO.e ?? self.template("500.xx", []) !! 'Internal Server Error';
                     } else {
                         $err-page = 'Internal Server Error';

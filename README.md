@@ -1,10 +1,14 @@
 # Bailador
 
-[![Build Status](https://travis-ci.org/ufobat/Bailador.png)](https://travis-ci.org/ufobat/Bailador) [![Build status](https://ci.appveyor.com/api/projects/status/github/ufobat/Bailador?svg=true)](https://ci.appveyor.com/project/ufobat/Bailador/branch/master)
+[![Build Status](https://travis-ci.org/Bailador/Bailador.png)](https://travis-ci.org/Bailador/Bailador) [![Build status](https://ci.appveyor.com/api/projects/status/github/Bailador/Bailador?svg=true)](https://ci.appveyor.com/project/Bailador/Bailador/branch/master)
 
 A light-weight route-based web application framework for Perl 6.
 
+Talk to the developers at https://perl6-bailador.slack.com/
+
 # TABLE OF CONTENTS
+- [Install](#install)
+- [Contribution](#contribution)
 - [Example](#example)
 - [How to Write Web Apps](#how-to-write-web-apps)
     - [Mixing both Approaches](#mixing-both-approaches)
@@ -42,6 +46,32 @@ A light-weight route-based web application framework for Perl 6.
 - [Bailador-based applications](#bailador-based-applications)
 - [Articles about Bailador](#articles-about-bailador)
 - [License](#license)
+- [Rebailador](#rebailador)
+
+## Install
+
+Once you have [Rakudo Star]() installed open a terminal (or command line on Windows) and type:
+```
+zef update
+zef install Bailador
+```
+This should download and install Bailador.
+
+## Contribution
+
+If you'd like to contribute to Bailador you need to `fork` the [GitHub](https://github.com/Bailador/Bailador) repository and clone the forked repo to your hard disk. Then you need to install all the dependencies of Bailador:
+
+```
+cd Bailador
+zef --depsonly install .
+```
+
+Run the tests that come with Bailador to make sure everything passes *before* your start making changes. Run:
+```
+prove6 -l
+```
+
+The rest is "standard" GitHub process. Talk to us on our [Slack channel](https://perl6-bailador.slack.com/)
 
 ## Example
 
@@ -60,7 +90,7 @@ This will install the Bailador server in default port 3000. For more examples, p
 
 ## How to Write Web Apps
 
-Bailador offers two different approaches to write web applications. The first and classical approach is using the subs that are exported that you get when you `use Bailador`. This API is ment to be stable and should not change much.
+Bailador offers two different approaches to write web applications. The first and classical approach is using the subs that are exported that you get when you `use Bailador`. This API is meant to be stable and should not change much.
 
 New features like nested routes and whatever is yet to come are implemented in `Bailador::App` and can be used through the object oriented interface. Your own web application just inherits from `Bailador::App`.
 
@@ -84,7 +114,7 @@ app $app;
 
 #### `app(Bailador::App $app)`
 
-Sets a Bailador::App to be the default app for all the other exported subs described in [Subroutines that sould only be used inside the Code block of a Route](#subroutines-that-sould-only-be-used-inside-the-code-block-of-a-route).
+Sets a Bailador::App to be the default app for all the other exported subs described in [Subroutines that should only be used inside the Code block of a Route](#subroutines-that-sould-only-be-used-inside-the-code-block-of-a-route).
 
 ##### `get(Pair $x)`
 ##### `post(Pair $x)`
@@ -96,7 +126,7 @@ Adds a route for get, post, put or delete requests. The key of the
 automatically converted into a regex. The value of the pair must be a
 `Callable`. Whenever the route matches on the requested URL the
 callable is invoked with the list of the `Match` as its
-parameters. The return value of the callable will be autorendered. So
+parameters. The return value of the callable will be auto rendered. So
 it is the content of your response. The request is available via the
 appropriately named variable `request`; `request.params` will contain
 the route parameters, for instance; `request.params<q>` will yield the
@@ -138,7 +168,7 @@ Sets the Renderer that's being used to render your templates. See the Template s
 
 Returns the Sessions-config. You can influence how sessions work. See the Sessions section for details.
 
-##### `baile( [$port=3000] )`
+##### `baile( [$port=3000, $host=0.0.0.0] )`
 
 Let's enter the dance floor. ¡Olé!
 
@@ -162,7 +192,7 @@ Constructs a URI String from the base and the passed $path.
 
 ##### `header(Str $name, Cool $value)`
 
-Adds a Header to the Repsonse.
+Adds a Header to the Response.
 
 ##### `cookie(Str $name, Str $value, Str :$domain, Str :$path, DateTime :$expires, Bool :$http-only; Bool :$secure)`
 
@@ -282,7 +312,7 @@ In order to create a session just call the subroutine
     
 inside the code block of a route. This subroutine returns a Hash in which you can just toss in all data or objects that should be be in the session context.
 After your route code is finished the session will be stored automatically. How this should be done can be configured.
-The handling of sessions can be influencend if you call
+The handling of sessions can be influenced if you call
 
     sessions-config()
     
@@ -300,6 +330,19 @@ The Session-ID contains a HMAC to check if someone's trying to guess a Session-I
 The Session Data itself is stored by default in the memory, if you want to store the data on the disk or database of wherever, just implement a class which does the role Bailador::Sessions::Store
 and set backend to this class name.
 
+## Configuration
+
+Using the `BAILADOR` environment variable we can configure various aspects how Bailador will run.
+Currently available parameters:
+
+* debug       (turns on debug mode)
+* port:PORT   (defaults to 3000)
+* host:HOST   (defaults to 127.0.0.1)
+
+```
+BAILADOR=debug,host:0.0.0.0,port:5000
+```
+
 
 ## Bailador-based applications
 
@@ -311,6 +354,29 @@ and set backend to this class name.
 
 http://perl6maven.com/bailador
 
+## Book about Bailador
+
+In the planning phase, currently crowdfunding it: https://leanpub.com/bailador
+
 ## License
 
 MIT License
+
+## Rebailador
+
+`rebailador` will watch the source code of your Bailador app for changes and automatically restart the app.
+
+
+    rebailador bin/your-bailador-app.p6
+
+    rebailador --w=lib,bin,views,public   bin/your-bailador-app.p6
+
+### `--w`
+
+Takes comma-separated list of directories to watch. By default,
+will watch `lib` and `bin` directories.
+
+If you have to watch a directory with a comma in its name, prefix it with a backslash:
+
+    rebailador --w=x\\,y bin/app.p6  # watches directory "x,y"
+

@@ -10,6 +10,11 @@ get '/' => sub {
     "hello world"
 }
 
+get '/die' => sub {
+    die 'This is an exception so you can see how it is handled';
+    "hello world"
+}
+
 get '/about' => sub {
     "about me"
 }
@@ -32,5 +37,17 @@ get / ^ '/template/' (.+) $ / => sub ($x) {
     template 'tmpl.tt', { name => $x }
 }
 
-my $port = %*ENV<PORT>??%*ENV<PORT>!!3000;
-baile($port);
+get '/env' => sub {
+    my Str $result;
+    for request.env.sort(*.key)>>.kv -> ($k, $v) {
+        $result ~= "$k\t" ~ $v.perl ~ "\n";
+    }
+    app.render: content => $result, type => 'text/plain';
+    $result;
+}
+
+get '/die' => sub {
+    die 'died for love';
+}
+
+baile();

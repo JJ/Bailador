@@ -105,11 +105,32 @@ sub redirect(Str $location) is export {
     app.redirect($location);
 }
 
-sub baile($port = 3000) is export {
+sub config(Str $key, $value) is export {
+    app."$key"() = $value;
+}
+
+sub baile($port is copy = 3000, $host is copy = '127.0.0.1', :$debug = False) is export {
+    app.debug = $debug;
+
+    if %*ENV<BAILADOR> {
+        my @pairs = %*ENV<BAILADOR>.split(',');
+        for @pairs -> $p {
+            my ($k, $v) = $p.split(/<[:=]>/);
+            if $k eq 'debug' {
+                app.debug = True;
+            }
+            if $k eq 'port' {
+                $port = $v.Int;
+            }
+            if $k eq 'host' {
+                $host = $v;
+            }
+        }
+    }
     my $psgi-app = app.get-psgi-app();
     given HTTP::Easy::PSGI.new(:port($port)) {
         .app($psgi-app);
-        say "Entering the development dance floor: http://0.0.0.0:$port";
+        say "Entering the development dance floor{app.debug ?? ' in debug mode' !! ''}: http://$host:$port";
         .run;
     }
 }
